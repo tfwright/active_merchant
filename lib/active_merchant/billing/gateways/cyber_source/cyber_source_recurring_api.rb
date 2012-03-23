@@ -13,13 +13,13 @@ module ActiveMerchant #:nodoc:
       #
       # ==== Options
       #
-      # * <tt>:frequency</tt> -- How often card should be charged (REQUIRED)
-      # * <tt>:billing_address</tt> -- The description to appear in the profile (REQUIRED)
+      # * <tt>:subscription</tt> -- Subscription info (REQUIRED)
+      # * <tt>:billing_address</tt> -- Billing address for subscription (REQUIRED)
       # * <tt>:order_id</tt> -- ? (REQUIRED)
       # * <tt>:email</tt> -- ? (REQUIRED)
       def recurring(credit_card, options = {})
-        requires!(options, [:frequency, "on-demand", "weekly", "bi-weekly", "semi-monthly", "quarterly", "quad-weekly", "semi-annually", "annually"], 
-          :billing_address, :order_id, :email)
+        requires!(options, :subscription, :billing_address, :order_id, :email)
+        requires!(options[:subscription], [:frequency, "on-demand", "weekly", "bi-weekly", "semi-monthly", "quarterly", "quad-weekly", "semi-annually", "annually"])
         requires!(options[:billing_address], :first_name, :last_name)
         setup_address_hash(options)
         commit(build_create_subscription_request(credit_card, options), options)
@@ -55,7 +55,7 @@ module ActiveMerchant #:nodoc:
       def bill_outstanding_amount(profile_id, money, options = {})
         raise_error_if_blank('profile_id', profile_id)
         raise_error_if_blank('money', money)
-        commit(build_subscription_purchase_request(money, options), options)
+        commit(build_subscription_purchase_request(profile_id, money, options), options)
       end
 
       private
@@ -66,7 +66,7 @@ module ActiveMerchant #:nodoc:
       	
       def build_create_subscription_request(credit_card, options)
         xml = Builder::XmlMarkup.new :indent => 2
-        add_address(xml, options[:billing_address], options)
+        add_address(xml, credit_card, options[:billing_address], options)
         add_purchase_data(xml, options[:setup_fee], true, options)  
         add_creditcard(xml, credit_card)
         add_subscription(xml, options)
@@ -80,7 +80,7 @@ module ActiveMerchant #:nodoc:
         options[:subscription] ||= {}
         options[:subscription][:subscription_id] = subscription_id
         xml = Builder::XmlMarkup.new :indent => 2
-        add_address(xml, options[:billing_address], options) unless options[:billing_address].blank?
+        add_address(xml, options[:credit_card], options[:billing_address], options) if options[:billing_address] && options[:credit_card]
         add_purchase_data(xml, options[:setup_fee], true, options) unless options[:setup_fee].blank?
         add_creditcard(xml, options[:credit_card]) if options[:credit_card]
         add_subscription(xml, options)
@@ -90,10 +90,9 @@ module ActiveMerchant #:nodoc:
       end
       
 
-      def build_subscription_purchase_request(money, identification, options)
-        reference_code, subscription_id, request_token = identification.split(";")
+      def build_subscription_purchase_request(profile_id, money, options)
         options[:subscription] ||= {}
-        options[:subscription][:subscription_id] = subscription_id
+        options[:subscription][:subscription_id] = profile_id
         xml = Builder::XmlMarkup.new :indent => 2
         add_purchase_data(xml, money, true, options)
         add_subscription(xml, options)
