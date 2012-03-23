@@ -43,7 +43,38 @@ class CyberSourceTest < Test::Unit::TestCase
                  ],
           :currency => 'USD'
     }
+    
+    @recurring_required_fields = {:frequency => "on-demand", :order_id => '101010', :email => "test@example.com", 
+      :billing_address => {
+        :first_name => "Test", :last_name => "Customner"
+      }
+    }
   end
+  
+  def test_recurring_requires_frequency
+    @recurring_required_fields.delete(:frequency)
+    assert_raise(ArgumentError){ @gateway.recurring(@amount, @credit_card, @options.merge(@recurring_required_fields)) }
+  end
+
+  def test_recurring_requires_order_id
+    @recurring_required_fields.delete(:order_id)
+    assert_raise(ArgumentError){ @gateway.recurring(@amount, @credit_card, @options.merge(@recurring_required_fields)) }
+  end
+
+  def test_recurring_requires_email
+    @recurring_required_fields.delete(:email)
+    assert_raise(ArgumentError){ @gateway.recurring(@amount, @credit_card, @options.merge(@recurring_required_fields)) }
+  end
+
+  def test_recurring_requires_billing_address
+    @recurring_required_fields.delete(:billing_address)
+    assert_raise(ArgumentError){ @gateway.recurring(@amount, @credit_card, @options.merge(@recurring_required_fields)) }
+  end
+
+  def test_update_recurring_requires_profile_id
+    assert_raise(ArgumentError){ @gateway.update_recurring(nil, :amount => 100)}
+  end
+  
   
   def test_successful_purchase
     @gateway.expects(:ssl_post).returns(successful_purchase_response)

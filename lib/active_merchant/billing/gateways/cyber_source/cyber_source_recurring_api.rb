@@ -42,7 +42,7 @@ module ActiveMerchant #:nodoc:
       def update_recurring(profile_id, options={})
         raise_error_if_blank('profile_id', profile_id)
         opts = options.dup
-        commit(build_update_subscription_request(profile_idoptions), options)
+        commit(build_update_subscription_request(profile_id, options), options)
       end
       
       # Bills outstanding amount to a recurring payment profile.
