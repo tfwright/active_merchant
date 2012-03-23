@@ -37,25 +37,25 @@ module ActiveMerchant #:nodoc:
       # ==== Parameters
       #
       # * <tt>options</tt> -- A hash of parameters.
-      # * <tt>profile_id</tt> -- A string containing the +profile_id+ of the
+      # * <tt>subscription_id</tt> -- A string containing the +subscription_id+ of the
       # recurring payment already in place for a given credit card. (REQUIRED)
-      def update_recurring(profile_id, options={})
-        raise_error_if_blank('profile_id', profile_id)
+      def update_recurring(subscription_id, options={})
+        raise_error_if_blank('subscription_id', subscription_id)
         opts = options.dup
-        commit(build_update_subscription_request(profile_id, options), options)
+        commit(build_update_subscription_request(subscription_id, options), options)
       end
       
       # Bills outstanding amount to a recurring payment profile.
       #
       # ==== Parameters
       #
-      # * <tt>profile_id</tt> -- A string containing the +profile_id+ of the
+      # * <tt>subscription_id</tt> -- A string containing the +subscription_id+ of the
       # recurring payment already in place for a given credit card. (REQUIRED)
       # * <tt>money</tt> -- Amount to charge card stored in profile
-      def bill_outstanding_amount(profile_id, money, options = {})
-        raise_error_if_blank('profile_id', profile_id)
+      def bill_outstanding_amount(subscription_id, money, options = {})
+        raise_error_if_blank('subscription_id', subscription_id)
         raise_error_if_blank('money', money)
-        commit(build_subscription_purchase_request(profile_id, money, options), options)
+        commit(build_subscription_purchase_request(subscription_id, money, options), options)
       end
 
       private
@@ -90,9 +90,9 @@ module ActiveMerchant #:nodoc:
       end
       
 
-      def build_subscription_purchase_request(profile_id, money, options)
+      def build_subscription_purchase_request(subscription_id, money, options)
         options[:subscription] ||= {}
-        options[:subscription][:subscription_id] = profile_id
+        options[:subscription][:subscription_id] = subscription_id
         xml = Builder::XmlMarkup.new :indent => 2
         add_purchase_data(xml, money, true, options)
         add_subscription(xml, options)
