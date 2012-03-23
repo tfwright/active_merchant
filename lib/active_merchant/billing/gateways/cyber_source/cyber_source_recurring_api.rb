@@ -29,10 +29,7 @@ module ActiveMerchant #:nodoc:
       #
       # This transaction updates an existing Recurring Billing Profile
       # and the subscription must have already been created previously 
-      # by calling +recurring()+. The ability to change certain
-      # details about a recurring payment is dependent on transaction history
-      # and the type of plan you're subscribed with paypal. Web Payment Pro
-      # seems to have the ability to update the most field.
+      # by calling +recurring()+.
       #
       # ==== Parameters
       #
