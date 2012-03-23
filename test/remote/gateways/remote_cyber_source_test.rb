@@ -35,6 +35,21 @@ class RemoteCyberSourceTest < Test::Unit::TestCase
       :ignore_avs => 'true',
       :ignore_cvv => 'true'
     }
+    
+    @subscription_options = {
+      :order_id => 12345,
+      :email => 'someguy1232@fakeemail.net',
+      :credit_card => @credit_card,
+      :setup_fee => 100,
+      :billing_address => address.merge(:first_name => 'Jim', :last_name => 'Smith'),
+      :subscription => {
+        :frequency => "weekly",
+        :start_date => Date.today.next_week,
+        :occurrences => 4,
+        :auto_renew => true,
+        :amount => 100
+      }	
+    }
 
   end
   
@@ -165,4 +180,37 @@ class RemoteCyberSourceTest < Test::Unit::TestCase
     assert_success response
     assert response.test?       
   end
+  
+  def test_successful_create_subscription
+    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+
+  def test_successful_create_subscription_with_setup_fee
+    assert response = @gateway.recurring(@credit_card, @subscription_options.merge(:setup_fee => 100))
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+  
+  def test_successful_update_subscription
+    response = @gateway.recurring(@credit_card, @subscription_options)
+    
+    assert response = @gateway.update_recurring(response.authorization, {:order_id =>generate_unique_id,:credit_card => @credit_card, :setup_fee => 100})
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+  
+  def test_successful_bill_outstanding_amount
+    assert response = @gateway.recurring(@credit_card, @subscription_options)
+    
+    assert response = @gateway.bill_outstanding_amount(response.authorization, @amount, {})
+    assert_equal 'Successful transaction', response.message
+    assert_success response
+    assert response.test?
+  end
+  
 end
