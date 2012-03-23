@@ -28,7 +28,7 @@ module ActiveMerchant #:nodoc:
       # Update a recurring payment's details.
       #
       # This transaction updates an existing Recurring Billing Profile
-      # and the subscription must have already been created previously 
+      # and the subscription must have already been created previously
       # by calling +recurring()+.
       #
       # ==== Parameters
@@ -41,7 +41,7 @@ module ActiveMerchant #:nodoc:
         opts = options.dup
         commit(build_update_subscription_request(subscription_id, options), options)
       end
-      
+
       # Bills outstanding amount to a recurring payment profile.
       #
       # ==== Parameters
@@ -56,15 +56,15 @@ module ActiveMerchant #:nodoc:
       end
 
       private
-      
+
       def raise_error_if_blank(field_name, field)
         raise ArgumentError.new("Missing required parameter: #{field_name}") if field.blank?
       end
-      	
+
       def build_create_subscription_request(credit_card, options)
         xml = Builder::XmlMarkup.new :indent => 2
         add_address(xml, credit_card, options[:billing_address], options)
-        add_purchase_data(xml, options[:setup_fee], true, options)  
+        add_purchase_data(xml, options[:setup_fee], true, options)
         add_creditcard(xml, credit_card)
         add_subscription(xml, options)
         add_subscription_create_service(xml, options)
@@ -85,7 +85,7 @@ module ActiveMerchant #:nodoc:
         add_business_rules_data(xml)
         xml.target!
       end
-      
+
 
       def build_subscription_purchase_request(subscription_id, money, options)
         options[:subscription] ||= {}
@@ -96,13 +96,13 @@ module ActiveMerchant #:nodoc:
         add_purchase_service(xml, options)
         add_business_rules_data(xml)
         xml.target!
-      end 
-      
+      end
+
       def add_subscription_create_service(xml, options)
         add_purchase_service(xml, options) if options[:setup_fee]
-        xml.tag! 'paySubscriptionCreateService', {'run' => 'true'}      	
+        xml.tag! 'paySubscriptionCreateService', {'run' => 'true'}
       end
-      	
+
       def add_subscription_update_service(xml, options)
         add_purchase_service(xml, options) if options[:setup_fee]
         xml.tag! 'paySubscriptionUpdateService', {'run' => 'true'}
@@ -117,7 +117,7 @@ module ActiveMerchant #:nodoc:
         xml.tag! 'recurringSubscriptionInfo' do
           xml.tag! 'subscriptionID',    options[:subscription][:subscription_id]
           xml.tag! 'status',            options[:subscription][:status]                         if options[:subscription][:status]
-          xml.tag! 'amount',            options[:subscription][:amount]                         if options[:subscription][:amount]        
+          xml.tag! 'amount',            options[:subscription][:amount]                         if options[:subscription][:amount]
           xml.tag! 'numberOfPayments',  options[:subscription][:occurrences]                    if options[:subscription][:occurrences]
           xml.tag! 'automaticRenew',    options[:subscription][:auto_renew]                     if options[:subscription][:auto_renew]
           xml.tag! 'frequency',         options[:subscription][:frequency]                      if options[:subscription][:frequency]
