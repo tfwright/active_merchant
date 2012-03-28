@@ -182,7 +182,8 @@ class RemoteCyberSourceTest < Test::Unit::TestCase
   end
 
   def test_successful_create_subscription
-    assert response = @gateway.create_subscription(@credit_card, @subscription_options)
+    assert response = @gateway.recurring(@credit_card, @subscription_options)
+    pp response
     assert_equal 'Successful transaction', response.message
     assert_success response
     assert response.test?
@@ -204,7 +205,7 @@ class RemoteCyberSourceTest < Test::Unit::TestCase
   end
 
   def test_successful_bill_outstanding_amount
-    assert response = @gateway.recurring(@credit_card, @subscription_options)
+    response = @gateway.recurring(@credit_card, @subscription_options)
     assert response = @gateway.bill_outstanding_amount(response.authorization, @amount, {})
     assert_equal 'Successful transaction', response.message
     assert_success response
